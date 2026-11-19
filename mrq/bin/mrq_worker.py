@@ -17,7 +17,7 @@ import tempfile
 import signal
 import psutil
 import argparse
-import pipes
+import shlex
 
 sys.path.insert(0, os.getcwd())
 
@@ -40,7 +40,7 @@ def main():
 
         from mrq.supervisor import Supervisor
 
-        command = " ".join(map(pipes.quote, sys.argv))
+        command = " ".join(map(shlex.quote, sys.argv))
         w = Supervisor(command, numprocs=cfg["processes"])
         w.work()
         sys.exit(w.exitcode)
