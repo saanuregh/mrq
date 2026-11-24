@@ -2,16 +2,10 @@
 import os
 from future.builtins import str
 import sys
-is_pypy = '__pypy__' in sys.builtin_module_names
 
-# Needed to make getaddrinfo() work in pymongo on Mac OS X
-# Docs mention it's a better choice for Linux as well.
 # This must be done asap in the worker
-if "GEVENT_RESOLVER" not in os.environ and not is_pypy:
-    os.environ["GEVENT_RESOLVER"] = "ares"
-
-from gevent import monkey
-monkey.patch_all()
+from mrq.gevent_setup import patch_unless_job_process, start_job_processes_without_gevent
+patch_unless_job_process()
 
 import tempfile
 import signal
@@ -27,6 +21,8 @@ from mrq.context import set_current_config, set_logger_config
 
 
 def main():
+
+    start_job_processes_without_gevent()
 
     parser = argparse.ArgumentParser(description='Start a MRQ worker')
 

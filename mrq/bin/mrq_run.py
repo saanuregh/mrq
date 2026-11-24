@@ -3,18 +3,11 @@ from __future__ import print_function
 
 import os
 import sys
-is_pypy = '__pypy__' in sys.builtin_module_names
-
-# Needed to make getaddrinfo() work in pymongo on Mac OS X
-# Docs mention it's a better choice for Linux as well.
-# This must be done asap in the worker
-
-if "GEVENT_RESOLVER" not in os.environ and not is_pypy:
-    os.environ["GEVENT_RESOLVER"] = "ares"
 
 # We must still monkey-patch the methods for job sub-pools.
-from gevent import monkey
-monkey.patch_all()
+# This must be done asap in the worker
+from mrq.gevent_setup import patch_unless_job_process, start_job_processes_without_gevent
+patch_unless_job_process()
 
 import argparse
 import ujson as json
@@ -29,6 +22,8 @@ from mrq.job import queue_job
 from mrq.utils import load_class_by_path, MongoJSONEncoder
 
 def main():
+
+    start_job_processes_without_gevent()
 
     parser = argparse.ArgumentParser(description='Runs a task')
 
