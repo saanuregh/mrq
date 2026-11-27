@@ -383,13 +383,14 @@ class Job(object):
         current_greenletid = id(gevent.getcurrent())
 
         trace = "Job killed: %s" % reason
-        for greenlet, job in context._GLOBAL_CONTEXT["greenlets"].values():
+        # Iterate over a copy: entries are removed from the dict inside the loop.
+        for greenlet, job in list(context._GLOBAL_CONTEXT["greenlets"].values()):
             greenletid = id(greenlet)
             if job and job.id == self.id and greenletid != current_greenletid:
                 greenlet.kill(block=block)
                 trace += "\n\n--- Greenlet %s ---\n" % greenletid
                 trace += "".join(traceback.format_stack(greenlet.gr_frame))
-            context._GLOBAL_CONTEXT["greenlets"].pop(greenletid, None)
+                context._GLOBAL_CONTEXT["greenlets"].pop(greenletid, None)
 
         if reason == "timeout" and self.data["status"] != "timeout":
             updates = {

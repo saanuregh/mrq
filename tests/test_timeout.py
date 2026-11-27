@@ -24,6 +24,9 @@ def test_timeout_global_config(worker):
     assert worker.send_task("tests.tasks.general.Add", {"a": 41, "b": 1, "sleep": 0}) == 42
     assert worker.send_task("tests.tasks.general.Add", {"a": 41, "b": 1, "sleep": 2}, block=True, accept_statuses=["timeout"]) != 42
 
+    # The worker must keep enforcing timeouts after killing a job
+    assert worker.send_task("tests.tasks.general.Add", {"a": 41, "b": 1, "sleep": 2}, block=True, accept_statuses=["timeout"]) != 42
+
 
 def test_timeout_subpool(worker):
 
